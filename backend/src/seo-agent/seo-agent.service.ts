@@ -1,8 +1,67 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { get as httpsGet, Agent as HttpsAgent, type RequestOptions } from 'https';
+import { get as httpGet } from 'http';
+import { URL } from 'url';
 import { generateText, tool } from 'ai';
 import { createGroq } from '@ai-sdk/groq';
 import { z } from 'zod';
 import { Message } from '../chat/entities/message.entity';
+
+const HTTPS_AGENT_OPTIONS = { rejectUnauthorized: false };
+
+function fetchWithInsecureTls(
+  urlString: string,
+  timeoutMs = 15000,
+): Promise<string> {
+  const url = new URL(urlString);
+  const isHttps = url.protocol === 'https:';
+  const get = isHttps ? httpsGet : httpGet;
+  const options: RequestOptions = {
+    hostname: url.hostname,
+    port: url.port || (isHttps ? 443 : 80),
+    path: url.pathname + url.search,
+    method: 'GET',
+    headers: {
+      'User-Agent':
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+      Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+    },
+    ...(isHttps && { agent: new HttpsAgent(HTTPS_AGENT_OPTIONS) }),
+  };
+
+  return new Promise((resolve, reject) => {
+    let req: ReturnType<typeof get>;
+    const timer = setTimeout(() => {
+      req.destroy();
+      reject(new Error('Request timeout'));
+    }, timeoutMs);
+
+    req = get(options, (res) => {
+      clearTimeout(timer);
+      const location = res.headers.location;
+      if (res.statusCode === 301 || res.statusCode === 302) {
+        if (location) {
+          fetchWithInsecureTls(new URL(location, urlString).href, timeoutMs)
+            .then(resolve)
+            .catch(reject);
+          return;
+        }
+      }
+      if (res.statusCode && res.statusCode >= 400) {
+        reject(new Error(`HTTP ${res.statusCode}: ${res.statusMessage ?? ''}`));
+        return;
+      }
+      const chunks: Buffer[] = [];
+      res.on('data', (chunk) => chunks.push(chunk));
+      res.on('end', () => resolve(Buffer.concat(chunks).toString('utf-8')));
+      res.on('error', reject);
+    });
+    req.on('error', (err) => {
+      clearTimeout(timer);
+      reject(err);
+    });
+  });
+}
 
 const SYSTEM_PROMPT = `You are an expert SEO optimization assistant. Your role is to help users improve their website's search engine optimization.
 
@@ -79,23 +138,18 @@ export class SeoAgentService {
 
   private async fetchAndExtract(url: string): Promise<string> {
     try {
-      const response = await fetch(url, {
-        headers: {
-          'User-Agent':
-            'Mozilla/5.0 (compatible; SEO-Optimizer/1.0; +https://seo-optimizer.app)',
-        },
-        signal: AbortSignal.timeout(15000),
-      });
-
-      if (!response.ok) {
-        return JSON.stringify({ error: `HTTP ${response.status}: ${response.statusText}` });
-      }
-
-      const html = await response.text();
+      const html = await fetchWithInsecureTls(url);
       return this.extractSeoElements(html, url);
     } catch (error) {
+      const err = error instanceof Error ? error : new Error(String(error));
+      const cause = (err as Error & { cause?: unknown }).cause;
+      const causeErr = cause instanceof Error ? cause : null;
+      const detail = causeErr
+        ? `${err.message} (${causeErr.name}: ${causeErr.message})`
+        : err.message;
+      this.logger.warn(`Fetch failed for ${url}: ${detail}`, causeErr?.stack ?? err.stack);
       return JSON.stringify({
-        error: `Failed to fetch page: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        error: `Failed to fetch page: ${detail}`,
       });
     }
   }
