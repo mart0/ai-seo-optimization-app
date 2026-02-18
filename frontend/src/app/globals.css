@@ -1,0 +1,19 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  @apply bg-gray-50 text-gray-900 antialiased;
+}
+
+.prose pre {
+  @apply bg-gray-800 text-gray-100 rounded-lg;
+}
+
+.prose code {
+  @apply text-indigo-600 bg-indigo-50 px-1 py-0.5 rounded text-sm;
+}
+
+.prose pre code {
+  @apply text-gray-100 bg-transparent p-0;
+}
