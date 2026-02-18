@@ -39,6 +39,7 @@ export class ChatResolver {
     return this.chatService.sendMessage(
       input.content,
       input.conversationId,
+      input.model,
       user,
     );
   }

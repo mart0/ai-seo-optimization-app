@@ -61,7 +61,7 @@ export function ChatInterface() {
     scrollToBottom();
   }, [messages, scrollToBottom]);
 
-  async function handleSendMessage(content: string) {
+  async function handleSendMessage(content: string, model?: string) {
     if (isSending) return;
     setIsSending(true);
 
@@ -71,6 +71,7 @@ export function ChatInterface() {
           input: {
             content,
             conversationId: activeConversationId ?? undefined,
+            model: model ?? undefined,
           },
         },
       });

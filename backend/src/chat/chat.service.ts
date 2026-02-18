@@ -51,6 +51,7 @@ export class ChatService {
   async sendMessage(
     content: string,
     conversationId: string | undefined,
+    model: string | undefined,
     jwtPayload: JwtPayload,
   ): Promise<{ message: Message; conversation: Conversation }> {
     const user = await this.userService.findOrCreate(
@@ -89,7 +90,7 @@ export class ChatService {
       order: { createdAt: 'ASC' },
     });
 
-    const aiResponse = await this.seoAgentService.analyze(content, history);
+    const aiResponse = await this.seoAgentService.analyze(content, history, model);
 
     const assistantMessage = this.messageRepo.create({
       conversation,

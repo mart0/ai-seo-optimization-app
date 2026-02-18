@@ -2,13 +2,20 @@
 
 import { useState, useRef, useEffect } from 'react';
 
+export const MODEL_OPTIONS = [
+  { id: 'llama-3.3-70b-versatile', label: 'Llama 3.3 70B' },
+  { id: 'llama-3.1-8b-instant', label: 'Llama 3.1 8B' },
+  { id: 'llama-3.3-70b-specdec', label: 'Llama 3.3 70B (Speculative)' },
+] as const;
+
 type ChatInputProps = {
-  onSend: (content: string) => void;
+  onSend: (content: string, model: string) => void;
   disabled: boolean;
 };
 
 export function ChatInput({ onSend, disabled }: ChatInputProps) {
   const [value, setValue] = useState('');
+  const [model, setModel] = useState(MODEL_OPTIONS[0].id);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
@@ -22,7 +29,7 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
   function handleSubmit() {
     const trimmed = value.trim();
     if (!trimmed || disabled) return;
-    onSend(trimmed);
+    onSend(trimmed, model);
     setValue('');
   }
 
@@ -64,6 +71,18 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
           />
         </svg>
       </button>
+      <select
+        value={model}
+        onChange={(e) => setModel(e.target.value)}
+        disabled={disabled}
+        className="h-11 px-3 rounded-xl border border-gray-300 bg-white text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent disabled:bg-gray-100 disabled:text-gray-400 shrink-0"
+      >
+        {MODEL_OPTIONS.map((opt) => (
+          <option key={opt.id} value={opt.id}>
+            {opt.label}
+          </option>
+        ))}
+      </select>
     </div>
   );
 }

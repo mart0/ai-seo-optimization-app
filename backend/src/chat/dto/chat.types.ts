@@ -40,6 +40,9 @@ export class SendMessageInput {
 
   @Field()
   content: string;
+
+  @Field({ nullable: true })
+  model?: string;
 }
 
 @ObjectType()

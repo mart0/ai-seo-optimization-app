@@ -41,15 +41,20 @@ const groq = createGroq({ apiKey: process.env.GROQ_API_KEY });
 export class SeoAgentService {
   private readonly logger = new Logger(SeoAgentService.name);
 
-  async analyze(userMessage: string, history: Message[]): Promise<string> {
+  async analyze(
+    userMessage: string,
+    history: Message[],
+    modelId?: string,
+  ): Promise<string> {
     try {
+      const model = groq(modelId ?? 'llama-3.3-70b-versatile');
       const messages = history.map((m) => ({
         role: m.role as 'user' | 'assistant',
         content: m.content,
       }));
 
       const { text } = await generateText({
-        model: groq('llama-3.3-70b-versatile'),
+        model,
         system: SYSTEM_PROMPT,
         messages: [...messages, { role: 'user' as const, content: userMessage }],
         tools: {
