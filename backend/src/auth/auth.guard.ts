@@ -46,9 +46,36 @@ export class GqlAuthGuard implements CanActivate {
         audience: process.env.AUTH0_AUDIENCE,
         issuer: `https://${domain}/`,
         algorithms: ['RS256'],
-      });
+      }) as { sub: string; email?: string; name?: string; picture?: string };
 
-      req.user = verified;
+      // Access tokens often omit email/name; fetch from UserInfo for DB
+      let email = verified.email;
+      let name = verified.name;
+      let picture = verified.picture;
+      try {
+        const userinfoRes = await fetch(`https://${domain}/userinfo`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (userinfoRes.ok) {
+          const profile = (await userinfoRes.json()) as {
+            email?: string;
+            name?: string;
+            picture?: string;
+          };
+          email = profile.email ?? email;
+          name = profile.name ?? name;
+          picture = profile.picture ?? picture;
+        }
+      } catch {
+        // keep token claims only
+      }
+
+      req.user = {
+        sub: verified.sub,
+        email,
+        name,
+        picture,
+      };
       return true;
     } catch {
       return false;
