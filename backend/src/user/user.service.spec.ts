@@ -7,6 +7,7 @@ import { User } from './user.entity';
 describe('UserService', () => {
   let service: UserService;
   let userRepo: jest.Mocked<Repository<User>>;
+  let module: TestingModule;
 
   const mockUser: User = {
     id: 'user-1',
@@ -24,7 +25,7 @@ describe('UserService', () => {
       save: jest.fn(),
     };
 
-    const module: TestingModule = await Test.createTestingModule({
+    module = await Test.createTestingModule({
       providers: [
         UserService,
         {
@@ -36,6 +37,10 @@ describe('UserService', () => {
 
     service = module.get<UserService>(UserService);
     userRepo = module.get(getRepositoryToken(User)) as jest.Mocked<Repository<User>>;
+  });
+
+  afterAll(async () => {
+    await module?.close();
   });
 
   it('should be defined', () => {

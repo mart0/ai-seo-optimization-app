@@ -48,6 +48,7 @@ describe('ChatService', () => {
   let messageRepo: jest.Mocked<Repository<Message>>;
   let userService: jest.Mocked<UserService>;
   let seoAgentService: jest.Mocked<SeoAgentService>;
+  let module: TestingModule;
 
   beforeEach(async () => {
     const mockConvRepo = {
@@ -63,7 +64,7 @@ describe('ChatService', () => {
       save: jest.fn(),
     };
 
-    const module: TestingModule = await Test.createTestingModule({
+    module = await Test.createTestingModule({
       providers: [
         ChatService,
         { provide: getRepositoryToken(Conversation), useValue: mockConvRepo },
@@ -84,6 +85,10 @@ describe('ChatService', () => {
     messageRepo = module.get(getRepositoryToken(Message)) as jest.Mocked<Repository<Message>>;
     userService = module.get(UserService) as jest.Mocked<UserService>;
     seoAgentService = module.get(SeoAgentService) as jest.Mocked<SeoAgentService>;
+  });
+
+  afterAll(async () => {
+    await module?.close();
   });
 
   it('should be defined', () => {

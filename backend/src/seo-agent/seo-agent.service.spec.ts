@@ -11,14 +11,19 @@ const mockGenerateText = generateText as jest.MockedFunction<typeof generateText
 
 describe('SeoAgentService', () => {
   let service: SeoAgentService;
+  let module: TestingModule;
 
   beforeEach(async () => {
     jest.clearAllMocks();
-    const module: TestingModule = await Test.createTestingModule({
+    module = await Test.createTestingModule({
       providers: [SeoAgentService],
     }).compile();
 
     service = module.get<SeoAgentService>(SeoAgentService);
+  });
+
+  afterAll(async () => {
+    await module?.close();
   });
 
   it('should be defined', () => {
