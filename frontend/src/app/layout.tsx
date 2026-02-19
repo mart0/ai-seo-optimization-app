@@ -6,6 +6,10 @@ import './globals.css';
 export const metadata: Metadata = {
   title: 'SEO Optimizer - AI-Powered Content SEO',
   description: 'Analyze and optimize your website SEO with AI assistance',
+  icons: {
+    icon: '/favicon.png',
+    apple: '/favicon.png',
+  },
 };
 
 export default function RootLayout({
