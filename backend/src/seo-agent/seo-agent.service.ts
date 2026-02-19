@@ -1,4 +1,5 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
+import { Logger } from '../logger';
 import { get as httpsGet, Agent as HttpsAgent, type RequestOptions } from 'https';
 import { get as httpGet } from 'http';
 import { URL } from 'url';
@@ -98,7 +99,7 @@ const groq = createGroq({ apiKey: process.env.GROQ_API_KEY });
 
 @Injectable()
 export class SeoAgentService {
-  private readonly logger = new Logger(SeoAgentService.name);
+  private readonly logger = Logger.forContext(SeoAgentService.name);
 
   async analyze(
     userMessage: string,
@@ -147,7 +148,7 @@ export class SeoAgentService {
       const detail = causeErr
         ? `${err.message} (${causeErr.name}: ${causeErr.message})`
         : err.message;
-      this.logger.warn(`Fetch failed for ${url}: ${detail}`, causeErr?.stack ?? err.stack);
+      this.logger.warn(`Fetch failed for ${url}: ${detail}`, { stack: causeErr?.stack ?? err.stack });
       return JSON.stringify({
         error: `Failed to fetch page: ${detail}`,
       });
