@@ -97,8 +97,30 @@ export function ChatMessage({ role, content, onRetry }: ChatMessageProps) {
       </div>
       <div className="max-w-[85%] flex flex-col gap-1.5">
         <div className="bg-white border border-gray-200 rounded-2xl rounded-tl-sm px-4 py-3">
-          <div className="prose prose-sm max-w-none prose-headings:text-gray-900 prose-p:text-gray-700 prose-strong:text-gray-900 prose-li:text-gray-700 prose-table:text-gray-700">
-            <ReactMarkdown remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>
+          <div className="prose prose-sm max-w-none prose-headings:text-gray-900 prose-p:text-gray-700 prose-strong:text-gray-900 prose-li:text-gray-700 prose-table:text-gray-700 [&_h2[data-section=comment]+p]:text-sm [&_h2[data-section=comment]+p]:leading-snug [&_h3[data-section=comment]+p]:text-sm [&_h3[data-section=comment]+p]:leading-snug">
+            <ReactMarkdown
+              remarkPlugins={[remarkGfm]}
+              components={{
+                h2: ({ children, ...props }) => {
+                  const isComment = String(children).trim() === 'Comment';
+                  return (
+                    <h2 data-section={isComment ? 'comment' : undefined} {...props}>
+                      {children}
+                    </h2>
+                  );
+                },
+                h3: ({ children, ...props }) => {
+                  const isComment = String(children).trim() === 'Comment';
+                  return (
+                    <h3 data-section={isComment ? 'comment' : undefined} {...props}>
+                      {children}
+                    </h3>
+                  );
+                },
+              }}
+            >
+              {content}
+            </ReactMarkdown>
           </div>
         </div>
 

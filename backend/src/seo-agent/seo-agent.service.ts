@@ -93,6 +93,8 @@ When using markdown tables, put each row on its own line. For example:
 
 Do not put the entire table on one line; use line breaks between the header, separator, and each data row.
 
+After each "Current Value" / "Suggested Improvement" table (or pair), add a subsection titled **Comment** where you explain in one or two sentences how the tag can be improved and why. Use the heading "## Comment" (or "### Comment" if under a subheading) for this section.
+
 If the user asks general SEO questions without a URL, provide helpful and practical guidance.`;
 
 const groq = createGroq({ apiKey: process.env.GROQ_API_KEY });
