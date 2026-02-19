@@ -22,7 +22,7 @@ const authLink = setContext(async (_, { headers }) => {
   }
 
   try {
-    const res = await fetch('/api/auth/token');
+    const res = await fetch('/api/auth/token', { credentials: 'include' });
     if (res.ok) {
       const { accessToken } = await res.json();
       if (accessToken) {

@@ -9,6 +9,7 @@ export async function GET() {
     const { accessToken } = await getAccessToken();
     return NextResponse.json({ accessToken });
   } catch {
+    // No Auth0 session (not logged in, expired, or cookie missing)
     return NextResponse.json({ accessToken: null }, { status: 401 });
   }
 }
