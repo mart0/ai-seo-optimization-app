@@ -9,6 +9,7 @@ import {
   SEND_MESSAGE,
   DELETE_CONVERSATION,
 } from '@/lib/graphql/queries';
+import { RETRY_INSTRUCTION } from '@/constants/chat';
 import { Sidebar } from './Sidebar';
 import { ChatMessage } from './ChatMessage';
 import { ChatInput } from './ChatInput';
@@ -212,8 +213,20 @@ export function ChatInterface() {
             </div>
           ) : (
             <div className="max-w-3xl mx-auto space-y-6">
-              {messages.map((msg) => (
-                <ChatMessage key={msg.id} role={msg.role} content={msg.content} />
+              {messages.map((msg, i) => (
+                <ChatMessage
+                  key={msg.id}
+                  role={msg.role}
+                  content={msg.content}
+                  onRetry={
+                    msg.role === 'assistant' && i > 0
+                      ? () => {
+                          const prevUserContent = messages[i - 1].content;
+                          handleSendMessage(prevUserContent + RETRY_INSTRUCTION);
+                        }
+                      : undefined
+                  }
+                />
               ))}
               {isSending && (
                 <div className="flex items-start gap-3">
