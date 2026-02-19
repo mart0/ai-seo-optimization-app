@@ -95,6 +95,8 @@ Do not put the entire table on one line; use line breaks between the header, sep
 
 After each "Current Value" / "Suggested Improvement" table (or pair), add a subsection titled **Comment** where you explain in one or two sentences how the tag can be improved and why. Use the heading "## Comment" (or "### Comment" if under a subheading) for this section.
 
+When you have finished analyzing all relevant SEO elements for a URL, always end your response with a final section titled **Conclusion**. Under "## Conclusion", write exactly 2 to 4 sentences that summarize the overall level of the page's SEO (e.g. weak, moderate, good, or strong) and the main takeaways. Be concise and direct.
+
 If the user asks general SEO questions without a URL, provide helpful and practical guidance.`;
 
 const groq = createGroq({ apiKey: process.env.GROQ_API_KEY });
